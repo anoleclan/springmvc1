@@ -1,0 +1,332 @@
+﻿<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta charset="utf-8">
+        <title>“同路”拼车</title>
+        <meta name="viewport" content="initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-touch-fullscreen" content="yes" />
+        <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png"
+        />
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png"
+        />
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png"
+        />
+        <link rel="apple-touch-icon-precomposed" sizes="57x57" href="apple-touch-icon-57x57-precomposed.png"
+        />
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <link href="css/my_master.css" rel="stylesheet">
+        <script src="js/jquery.min.js">
+        </script>
+        <script src="js/bootstrap.min.js">
+        </script>
+        <script src="js/jquery.cookie.min.js">
+        </script>
+        <script src="js/custom.js">
+        </script>
+        <script src="js/custom.action.js">
+        </script>
+        <script>
+            
+$(function(){
+      var userid = getCookie("UserID") == undefined ? false: getCookie("UserID");
+    var hascar = getCookie("HasCar") == undefined ? false: getCookie("HasCar");
+
+    var yyhtml = '<table class="table">';
+
+    var thisUserData = {};
+
+    if (userid == false) { //not login start
+        yyhtml += '<tbody><tr><td> <span class="glyphicon glyphicon-warning-sign"></span> 您没有预约拼车信息！ <a href="reg.html" class="btn btn-warning btn-xs" role="button">发布信息</a></td></tr></tbody></table>';
+
+        $(yyhtml).appendTo("#user-order-list").end();
+
+    } //not login end
+    else { // have login start
+        var postAttr = {
+            "userid": userid,
+            "hasCar": hascar,
+            "action": 1,
+
+        };
+        formSubmit.init(postURL, postAttr,function(){},function(data) { // yy order list start
+            var myData = data.data;
+            if (myData.length > 0) {
+                yyhtml += '<thead><tr><th>状态</th><th>预约时间</th><th></th></tr></thead>';
+                yyhtml += '<tbody>';
+            } else {
+                yyhtml += '<tbody><tr><td> <span class="glyphicon glyphicon-warning-sign"></span> 您没有预约拼车信息！ <a href="yy.html" class="btn btn-info btn-xs" role="button">我要拼车</a></td></tr></tbody></table>';
+            }
+
+            if (myData.length > 0) {
+
+                $.each(myData,function(i, d) {
+                    thisUserData[d.orderid] = d;
+                    var bd = getButton(d, 0, 0);
+
+                    var button = '<button type="button" rel="' + bd.orderActionButtonStatus + '" class="btn ' + bd.orderActionButtonClass + ' btn-xs action-btn" ' + bd.orderActionButtonDisable + ' title="' + d.orderid + '">' + bd.orderActionButtonText + '</button>';
+
+
+                    var detailButton = '<button type="button" class="btn btn-primary btn-xs detail-yy-button" data-toggle="modal" title="' + d.orderid + '"><span class="glyphicon glyphicon-plus-sign"></span></button>';
+                    var dateTime = getIndexTime(d.when);
+                    yyhtml += '<tr><td>' + button + '</td><td>' + dateTime + '</td><td>' + detailButton + '</td></tr>';
+
+                    //order.html
+
+                })
+
+                yyhtml += '</tbody></table>';
+           
+            }
+            $(yyhtml).appendTo("#user-order-list").end();
+
+        },function() { //yy list and detail action start
+            orderAction(); //yy on list Action
+            $(".detail-yy-button").click(function(e) { //yy on detail Action start
+
+                var orderId = $(this).attr("title");
+                tData = thisUserData[orderId];
+                //console.log(tData);
+                hintOverlayObj.setTitle("订单详情");
+                var content = "";
+                var ordertime = getIndexTime(tData["when"]);
+                 var bd = getButton(tData, 0, 1);
+
+                var button = '<button type="button" rel="' + bd.orderActionButtonStatus + '" class="btn ' + bd.orderActionButtonClass + ' detail-action-btn" ' + bd.orderActionButtonDisable + ' title="' + tData.orderid + '">' + bd.orderActionButtonText + '</button>';
+
+                if (tData["picker"] != null) {
+
+                    content += '<p><strong>车牌号：</strong>' + tData["carnumber"] + '</p>';
+
+                    content += '<p><strong>车主电话：</strong>' + tData["pickerphone"] + ' <a href="tel:' + tData["pickerphone"] + '"><span class="glyphicon glyphicon-earphone" style="color:#339900"></span></a></p>';
+                }
+                content += '<p><strong>预约：</strong>从 <strong style="color:#009966">' + tData["from"] + '</strong> 到 <strong style="color:#FF0000">' + tData["to"] + '</strong></p>';
+
+                content += '<p><strong>预约时间：</strong>' + ordertime + '</p>';
+                content += '<p>' + button + '</p>';
+                hintOverlayObj.setBody(content);
+                hintOverlayObj.show();
+                orderAction(".detail-action-btn");
+               
+                  
+               
+            }); //yy on detail Action end
+
+        } //yy list and detail action end
+        ); // yy order list end
+    }
+
+
+
+});
+$(function(){
+  var userid = getCookie("UserID") == undefined ? false: getCookie("UserID");
+    var hascar = getCookie("HasCar") == undefined ? false: getCookie("HasCar");
+
+
+    var orderhtml = '<table class="table" >';
+
+    var thisUserOrderData = {};
+    if (userid == false) { //not login start
+        orderhtml += '<tbody><tr><td> <span class="glyphicon glyphicon-warning-sign"></span> 您没有拼车订单信息！ <button type="button" class="btn btn-warning btn-xs" disabled="disabled">请完善车主信息</button></td></tr></tbody></table>';
+        $(orderhtml).appendTo("#carman-order-list").end();
+    } //not login end
+    else { // have login start
+        var postAttr = {
+            "userid": userid,
+            "hasCar": hascar,
+
+        };
+        var myHostName = "";
+        if (document.location.hostname == "localhost") {
+            myHostName = "http://localhost/woclain/pinche";
+                 }else if (document.location.hostname == "112.124.37.204") {
+            myHostName = "http://112.124.37.204";
+        } else {
+            myHostName = "http://woclain-pinche.mybluemix.net";
+        }
+
+        
+
+        formSubmit.init(myHostName + "/admin/order-list-1.php", postAttr,function() {},function(data) { // order list start
+            var myData = data.data;
+
+            if (myData.length > 0) {
+                orderhtml += '<thead><tr><th>状态</th><th>时间</th><th>起点</th><th>终点</th><th></th></tr></thead>';
+                orderhtml += '<tbody>';
+            } else {
+                orderhtml += '<tbody><tr><td> <span class="glyphicon glyphicon-warning-sign"></span> 您没有拼车订单信息！ <a href="pcgc.html" class="btn btn-info btn-xs" role="button">我要接单</a></td></tr></tbody></table>';
+            }
+            if (myData.length > 0) {
+
+                $.each(myData,function(i, d) {
+
+                    thisUserOrderData[d.orderid] = d;
+                   
+                        var bd = getButton(d, 1,0);
+                        var button = '<button type="button" rel="' + bd.orderActionButtonStatus + '" class="btn ' + bd.orderActionButtonClass + ' btn-xs action-btn" ' + bd.orderActionButtonDisable + ' title="' + d.orderid + '">' + bd.orderActionButtonText + '</button>';
+                        var detailButton = '<button type="button" class="btn btn-primary btn-xs detail-order-button" data-toggle="modal" title="' + d.orderid + '"><span class="glyphicon glyphicon-plus-sign"></span></button>';
+                        var dateTime = getIndexTime(d.when, 1);
+
+                        orderhtml += '<tr><td>' + button + '</td><td>' + dateTime + '</td><td>' + d.from + '</td><td>' + d.to + '</td><td>' + detailButton + '</td></tr>';
+                  
+                })
+
+            }
+
+            $(orderhtml).appendTo("#carman-order-list").end();
+
+        },
+        function() {
+orderAction();
+
+          $(".detail-order-button").click(function(e) { //yy on detail Action start
+             
+                var orderId = $(this).attr("title");
+                tData = thisUserOrderData[orderId];
+                //console.log(tData);
+                hintOverlayObj.setTitle("订单详情");
+                var content = "";
+                var ordertime = getIndexTime(tData["when"]);
+                 var bd = getButton(tData, 1, 1);
+
+                var button = '<button type="button" rel="' + bd.orderActionButtonStatus + '" class="btn ' + bd.orderActionButtonClass + ' detail-order-action-btn" ' + bd.orderActionButtonDisable + ' title="' + tData.orderid + '">' + bd.orderActionButtonText + '</button>';
+
+                    content += '<p><strong>乘客电话：</strong>' + tData["phone"] + ' <a href="tel:' + tData["phone"] + '"><span class="glyphicon glyphicon-earphone" style="color:#339900"></span></a></p>';
+     
+                content += '<p><strong>预约：</strong>从 <strong style="color:#009966">' + tData["from"] + '</strong> 到 <strong style="color:#FF0000">' + tData["to"] + '</strong></p>';
+
+                content += '<p><strong>预约时间：</strong>' + ordertime + '</p>';
+                content += '<p>' + button + '</p>';
+                hintOverlayObj.setBody(content);
+                
+                hintOverlayObj.show();
+                
+      orderAction(".detail-order-action-btn");
+                
+            }); //yy on detail Actio
+        }); // order list end
+    }
+});
+
+
+
+            
+        </script>
+    </head>
+    
+    <body style="scroll-y:none;">
+        <header id="pc-header">
+        </header>
+        <section id="pc-content">
+            <div class="container">
+                <div class="list-group">
+                    <a href="yy.html" class="list-group-item">
+                        <h4 class="list-group-item-heading">
+                            <img src="images/time.png" width="45" height="45">
+                            上下班约车
+                            <span class="glyphicon glyphicon-menu-right" style="float:right;line-height:45px;">
+                            </span>
+                        </h4>
+                    </a>
+                    <a href="pcgc.html" class="list-group-item">
+                        <h4 class="list-group-item-heading">
+                            <img src="images/infinity.png" width="45" height="45" />
+                            约车广场
+                            <span class="glyphicon glyphicon-menu-right" style="float:right; line-height:45px;">
+                            </span>
+                        </h4>
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="container">
+            <!--如果我是乘客-->
+            <div class="panel panel-default" id="user-order-list">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list-alt">
+                    </span>
+                    我的预约
+                </div>
+                <!-- Table -->
+            </div>
+            <!--如果我是司机-->
+            <div class="panel panel-default" id="carman-order-list">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-briefcase">
+                    </span>
+                    我的订单
+                </div>
+                <!-- Table -->
+            </div>
+            <!--如果我是司机-->
+            <div class="modal fade bs-example-modal-sm-1" tabindex="-1" role="dialog"
+            aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">
+                                    &times;
+                                </span>
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                订单详情
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                <strong>
+                                    乘客电话：
+                                </strong>
+                                13555982530
+                                <a href="tel">
+                                    <span class="glyphicon glyphicon-earphone" style="color:#339900">
+                                    </span>
+                                </a>
+                            </p>
+                            <p>
+                                <strong>
+                                    预约：
+                                </strong>
+                                从
+                                <strong style="color:#009966">
+                                    天地软件园
+                                </strong>
+                                到
+                                <strong style="color:#FF0000">
+                                    黑石礁
+                                </strong>
+                            </p>
+                            <p>
+                                <strong>
+                                    预约时间：
+                                </strong>
+                                4月16日（周四）14:20
+                            </p>
+                            <p>
+                                <button type="button" class="btn btn-success">
+                                    我要接单
+                                </button>
+                                <button type="button" class="btn btn-success" disabled="disabled">
+                                    我已接单
+                                </button>
+                                <button type="button" class="btn btn-warning">
+                                    完成订单
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
+
+</html>

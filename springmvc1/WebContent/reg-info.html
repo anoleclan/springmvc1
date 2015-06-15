@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>车辆信息</title>
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="apple-touch-icon-57x57-precomposed.png" />
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="css/bootstrap-switch.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-switch.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.pt-BR.js"></script>
+    <script src="js/jquery.cookie.min.js"></script>
+    <script src="js/jquery.validate.js"></script>
+    <script src="js/jquery.maskedinput.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="js/custom.action.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            navObj.setTabActive("cz");
+            var regFormID = "#user-info-reg";
+            $(regFormID).validate({
+                submitHandler: function(form){
+                    errorLabelContainer: $(regFormID+" div.error");
+                    var data = $(regFormID).serializeArray();
+                    data[data.length] = {
+                        "name" : "UserID",
+                        "value" : getCookie("UserID")
+                    };
+                    formSubmit.init(postURL,data,pcMask.show(),function(data){
+                        setCookie("Phone",data.Phone);
+                        setCookie("UserID",data.UserId);
+                        setCookie("HasCar",data.hasCar);
+                        if(data.status==1){
+                            hintOverlayObj.setTitle("注册成功！");
+                            hintOverlayObj.setBody(data.message);
+                            pcMask.hide(function(){
+                                hintOverlayObj.show();
+                                hintOverlayObj.shown(function(){
+                                    if(data.hasCar=="0"){
+                                        document.location.href="yy.html";
+                                    }else{
+                                        document.location.href="pcgc.html";
+                                    }
+                                    
+                                });
+                            });
+                        }else{
+                            hintOverlayObj.setTitle("注册失败！");
+                            hintOverlayObj.setBody(data.message);
+                            pcMask.hide(function(){
+                                hintOverlayObj.show();
+                                hintOverlayObj.shown(function(){
+                                    document.location.href="profile.html";
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body style="scroll-y:none;">
+    <header id="pc-header">
+    </header>
+    <div class="container">
+    <section id="pc-content" class="well well-sm">
+        <form id="user-info-reg">
+           
+            <div class="form-group">
+                <span class="glyphicon glyphicon-barcode" style="color:#337ab7"></span> 车牌号码：
+                <input type="text" class="form-control required" name="carNumber" title="请输入正确的车牌号码！" placeholder="请输入车牌号码" value="辽B00000" />
+            </div>
+            <div class="form-group">
+                <span class="glyphicon glyphicon-info-sign" style="color:#5bc0de"></span> 车辆描述：
+                <input type="text" class="form-control required" name="carType" title="请简洁明了的输入车辆品牌，颜色等信息！如：宝马X5 黑色" placeholder="请输入车辆描述" value="宝马X5 黑色" />
+            </div>
+            <div class="form-group">
+                <span class="glyphicon glyphicon-transfer" style="color:#f0ad4e"></span> 行车路线：
+                <input type="text" class="form-control required" name="carRunPoint" title="多个行车路线请用‘逗号’隔开，请输入行车路线！" placeholder="请按'起始'->'结束'顺序，'逗号'连接输入！如： 天地软件园,万达广场,黑石礁,和平广场" value="天地软件园,万达广场,黑石礁,和平广场" />
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary btn-lg">提交</button>
+        </form>
+        <div class="error"></div>
+    </section>
+     </div>
+</body>
+</html>

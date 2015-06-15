@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>拼车预约</title>
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="apple-touch-icon-57x57-precomposed.png" />
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="css/bootstrap-switch.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-switch.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.pt-BR.js"></script>
+    <script src="js/jquery.cookie.min.js"></script>
+    <script src="js/jquery.validate.js"></script>
+    <script src="js/jquery.maskedinput.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="js/custom.action.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#pc-timepicker').datetimepicker({
+                pickDate: false
+            });
+        });
+    </script>
+    <script type="text/javascript">
+
+$(function(){
+    /*$(".changeEve").each(function(e){
+        var cookie = getCookie(this.name);
+        if(cookie != undefined){
+            this.value = cookie;
+            setCookie(this.name,"");
+        }
+    })
+    $(".changeEve").change(function(e){
+        setCookie(this.name,this.value);
+
+    });*/
+
+    var regFormID = "#order";
+    $(regFormID).validate({
+        submitHandler: function(form){
+            errorLabelContainer: $(regFormID+" div.error");
+            var data = $(regFormID).serializeArray();
+            cookieUserID = getCookie("UserID");
+            data[data.length] = setPostData("userid",cookieUserID);
+            
+            formSubmit.init(postURL,data,pcMask.show(),function(data){
+                
+         
+                setCookie("OrderID",data.orderId);
+                if(data.status==1){
+                    
+                    hintOverlayObj.setTitle("提交成功！");
+                    hintOverlayObj.setBody(data.message);
+                    pcMask.hide(function(){
+                        hintOverlayObj.show();
+                        hintOverlayObj.shown(function(){
+                            document.location.href="pcgc.html";
+                        });
+                    });
+                }else{
+                    hintOverlayObj.setTitle("提交失败！");
+                    hintOverlayObj.setBody(data.message);
+                    pcMask.hide(function(){
+                        hintOverlayObj.show();
+                    });
+                }
+            });
+        }
+    });
+            
+
+    
+});
+
+ </script>
+</head>
+<body style="scroll-y:none;">
+    <header id="pc-header">
+    </header>
+    <div class="container">
+    <div class="alert alert-warning alert-dismissible" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <strong>提示!</strong> 所有数据将做测试使用，不做实际订单，请放心测试。
+    </div>
+
+    <section id="pc-content" class="well well-sm">
+        <form id="order">
+            <div id="pc-timepicker" class="form-group">
+                <label for="when"><span class="glyphicon glyphicon-time" style="color:#337ab7"></span> 预约时间：</label>
+                <span class="add-on">
+                  <input id="when" data-format="hh:mm" name="when" type="text" class="form-control required changeEve" placeholder="请选择时间" title="请选择输入出发的时间，格式如下：hh:mm" value="" />
+                </span> 
+            </div>
+            <div class="form-group">
+                <label for="from"><span class="glyphicon glyphicon-map-marker" style="color:#009966"></span> 出发地点：</label>
+                <input type="from" class="form-control required changeEve" title="请您填写'出发地点'和'到达地点',如：黄妮川,软件园等" id="from" name="from" placeholder="请输入" value="" />
+            </div>
+            <div class="form-group">
+                <label for="to"><span class="glyphicon glyphicon-map-marker" style="color:#FF0000"></span> 到达地点：</label>
+                <input type="text" class="form-control required changeEve" title="请您填写'出发地点'和'到达地点',如：黄妮川,软件园等" id="to" name="to" placeholder="请输入" value="" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">确认预约</button>
+        </form>
+        <div class="error"></div>
+    </section>
+     </div>
+</body>
+</html>

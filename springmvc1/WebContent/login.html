@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>登录</title>
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="apple-touch-icon-144x144-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="apple-touch-icon-57x57-precomposed.png" />
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="css/bootstrap-switch.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-switch.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.pt-BR.js"></script>
+    <script src="js/jquery.cookie.min.js"></script>
+    <script src="js/jquery.validate.js"></script>
+    <script src="js/jquery.maskedinput.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="js/custom.action.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("input.phone").mask("999-9999-9999");
+        });
+    </script>
+    <script type="text/javascript">
+
+$(function(){
+
+    var backUrl = getCookie("BackUrl");
+    if(backUrl==window.location.href)
+        removeCookie("BackUrl");
+    var regFormID = "#login";
+    $(regFormID).validate({
+        submitHandler: function(form){
+            errorLabelContainer: $(regFormID+" div.error");
+            var data = $(regFormID).serializeArray();
+            formSubmit.init(postURL,data,pcMask.show(),function(data){
+                
+                
+                setCookie("Phone",data.Phone);
+                setCookie("UserID",data.UserID);
+                setCookie("HasCar",data.HasCar);
+                if(data.status==1){
+                    hintOverlayObj.setTitle("登录成功！");
+                    hintOverlayObj.setBody(data.message);
+                    pcMask.hide(function(){
+                        hintOverlayObj.show();
+                        hintOverlayObj.shown(function(){
+                            
+                            if(backUrl=="" || backUrl== undefined){
+                               document.location.href="main.html";
+                                //removeCookie("BackUrl");
+                            }else{
+                                if(data.HasCar=="0"){
+                                    document.location.href="yy.html";
+                                }else{
+                                    document.location.href="pcgc.html";
+                                }
+                            }
+                                //document.location.href=window.history.go(-1);
+                        });
+                    });
+                }else{
+                    hintOverlayObj.setTitle("登录失败！");
+                    hintOverlayObj.setBody(data.message);
+
+                    pcMask.hide(function(){
+                        hintOverlayObj.show();
+                    });
+                }
+            });
+        }
+    });
+            
+    $("#reg").click(function(){
+        document.location.href="reg.html";
+    });
+    
+});
+
+ </script>
+</head>
+<body style="scroll-y:none;">
+    <header id="pc-header">
+    </header>
+    <div class="container">
+    <section id="pc-content" class="well well-sm">
+        <form id="login">
+            <div class="form-group">
+                <span class="glyphicon glyphicon-phone" style="color:#5cb85c"></span> 手机号码：
+                <input type="text" class="form-control required phone" name="phone" title="请输入正确的手机号码！" minlength="11" placeholder="请输入手机号码" />
+            </div>
+            <div class="form-group">
+                <span class="glyphicon glyphicon-lock" style="color:#f0ad4e"></span> 密码：
+                <input type="password" class="form-control required password" name="password" title="请输入4位以上8位下的密码" placeholder="请输入" minlength="4" maxlength="8" />
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary btn-lg">登录</button>
+            <button type="button" class="btn btn-warning btn-lg" id="reg">注册</button>
+        </form>
+        <div class="error"></div>
+    </section>
+    </div>
+</body>
+</html>
